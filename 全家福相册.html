@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的四季相册</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .season-section {
+            margin-bottom: 50px;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .season-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .season-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .photo-card {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            aspect-ratio: 4/3;
+        }
+        .photo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .photo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .photo-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            color: white;
+            padding: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .photo-card:hover .photo-info {
+            opacity: 1;
+        }
+        .photo-date {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        .photo-desc {
+            font-size: 0.95em;
+        }
+        .upload-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .upload-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        #file-input {
+            display: none;
+        }
+        .upload-instructions {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        /* 照片墙样式 */
+        .photo-wall {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .photo-wall-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .photo-wall-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .photo-wall-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            aspect-ratio: 4/3;
+        }
+        .photo-wall-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-wall-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            color: white;
+            padding: 10px;
+            font-size: 0.8em;
+        }
+        
+        /* 幻灯片展示样式 */
+        .slideshow-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .slideshow-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            aspect-ratio: 16/9;
+        }
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .slide.active {
+            opacity: 1;
+        }
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .slide-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        .slide-date {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        .slide-desc {
+            font-size: 1.1em;
+        }
+        .slideshow-controls {
+            margin-top: 15px;
+        }
+        .slideshow-btn {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 0.9em;
+        }
+        .slideshow-btn:hover {
+            opacity: 0.9;
+        }
+        .folder-selector {
+            margin: 15px 0;
+        }
+        .folder-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .folder-selector select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            min-width: 200px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        /* 季节特色颜色 */
+        .spring { color: #4CAF50; }
+        .summer { color: #FF9800; }
+        .autumn { color: #795548; }
+        .winter { color: #03A9F4; }
+        
+        .spring-bg { background-color: rgba(76, 175, 80, 0.1); }
+        .summer-bg { background-color: rgba(255, 152, 0, 0.1); }
+        .autumn-bg { background-color: rgba(121, 85, 72, 0.1); }
+        .winter-bg { background-color: rgba(3, 169, 244, 0.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>我的四季相册</h1>
+            <p class="subtitle">珍藏生活中的美好瞬间</p>
+        </header>
+
+        <!-- 春季照片 -->
+        <section class="season-section spring-bg">
+            <div class="season-title">
+                <div class="season-icon" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%234CAF50\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z\'/></svg>');"></div>
+                <h2 class="spring">春季</h2>
+            </div>
+            <div class="gallery" id="spring-gallery">
+                <div class="photo-card">
+                    <img src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="春季照片" class="photo-img">
+                    <div class="photo-info">
+                        <div class="photo-date">2023年3月10日</div>
+                        <div class="photo-desc">郁金香盛开</div>
+                    </div>
+                </div>
+                <div class="photo-card">
+                    <img src="https://images.unsplash.com/photo-1526397751294-331021109fbd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="春季照片" class="photo-img">
+                    <div class="photo-info">
+                        <div class="photo-date">2023年4月5日</div>
+                        <div class="photo-desc">春日野花</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 夏季照片 -->
+        <section class="season-section summer-bg">
+            <div class="season-title">
+                <div class="season-icon" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23FF9800\'><path d=\'M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79zM1 10.5h3v2H1zM11 .55h2V3.5h-2zm8.04 2.495l1.408 1.407-1.79 1.79-1.407-1.408zm-1.8 15.115l1.79 1.8 1.41-1.41-1.8-1.79zM20 10.5h3v2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm-1 4h2v2.95h-2zm-7.45-.96l1.41 1.41 1.79-1.8-1.41-1.41z\'/></svg>');"></div>
+                <h2 class="summer">夏季</h2>
+            </div>
+            <div class="gallery" id="summer-gallery">
+                <div class="photo-card">
+                    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="夏季照片" class="photo-img">
+                    <div class="photo-info">
+                        <div class="photo-date">2023年6月20日</div>
+                        <div class="photo-desc">海边度假</div>
+                    </div>
+                </div>
+                <div class="photo-card">
+                    <img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="夏季照片" class="photo-img">
+                    <div class="photo-info">
+                        <div class="photo-date">2023年7月15日</div>
+                        <div class="photo-desc">夏日野餐</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 秋季照片 -->
+        <section class="season-section autumn-bg">
+            <div class="season-title">
+                <div class="season-icon" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23795548\'><path d=\'M12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6m0-2C9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96C18.67 6.59 15.64 4 12 4z\'/></svg>');"></div>
+                <h2 class="autumn">秋季</h2>
+            </div>
+            <div class="gallery" id="autumn-gallery">
+                <div class="photo-card">
+                    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="秋季照片" class="photo-img">
+                    <div class="photo-info">
+                        <div class="photo-date">2023年9月28日</div>
+                        <div class="photo-desc">金秋的麦田</div>
+                    </div>
+                </div>
+                <div class="photo-card">
+                    <img src="https://images.unsplash.com/photo-1476231682828-37e571bc172f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="秋季照片" class="photo-img">
+                    <div class="photo-info">
+                        <div class="photo-date">2023年10月15日</div>
+                        <div class="photo-desc">枫叶红了</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 冬季照片 -->
+        <section class="season-section winter-bg">
+            <div class="season-title">
+                <div class="season-icon" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%2303A9F4\'><path d=\'M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z\'/></svg>');"></div>
+                <h2 class="winter">冬季</h2>
+            </div>
+            <div class="gallery" id="winter-gallery">
+                <div class="photo-card">
+                    <img src="https://images.unsplash.com/photo-1517299321609-52687d1bc55a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="冬季照片" class="photo-img">
+                    <div class="photo-info">
+                        <div class="photo-date">2023年12月10日</div>
+                        <div class="photo-desc">第一场雪</div>
+                    </div>
+                </div>
+                <div class="photo-card">
+                    <img src="https://images.unsplash.com/photo-1518604666860-9ed391f76460?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="冬季照片" class="photo-img">
+                    <div class="photo-info">
+                        <div class="photo-date">2023年12月25日</div>
+                        <div class="photo-desc">圣诞节的温暖</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 上传照片区域 -->
+        <section class="upload-section">
+            <h2>添加你的照片</h2>
+            <p>记录生活中的美好时刻，随时上传你的四季照片</p>
+            <input type="file" id="file-input" accept="image/*" multiple>
+            <button class="upload-btn" onclick="document.getElementById('file-input').click()">上传照片</button>
+            <div class="upload-instructions">
+                完美支持JPG、PNG格式
+            </div>
+        </section>
+
+        <!-- 照片墙区域 -->
+        <section class="photo-wall">
+            <h2 class="photo-wall-title">所有照片墙</h2>
+            <div class="photo-wall-grid" id="photo-wall">
+                <!-- 照片将通过JavaScript动态添加 -->
+            </div>
+        </section>
+
+        <!-- 幻灯片展示区域 -->
+        <section class="slideshow-section">
+            <h2 class="photo-wall-title">照片幻灯片展示</h2>
+            
+            <div class="folder-selector">
+                <label for="folder-select">选择季节文件夹:</label>
+                <select id="folder-select">
+                    <option value="all">全部照片</option>
+                    <option value="spring">春季</option>
+                    <option value="summer">夏季</option>
+                    <option value="autumn">秋季</option>
+                    <option value="winter">冬季</option>
+                </select>
+            </div>
+            
+            <div class="slideshow-container" id="slideshow">
+                <!-- 幻灯片将通过JavaScript动态添加 -->
+                <div class="loading-container">
+                    <p>正在加载幻灯片...</p>
+                </div>
+            </div>
+            
+            <div class="slideshow-controls">
+                <button class="slideshow-btn" id="prev-btn">上一张</button>
+                <button class="slideshow-btn" id="play-pause-btn">暂停</button>
+                <button class="slideshow-btn" id="next-btn">下一张</button>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2025年   我的美好相册 | 珍藏生活中的美好记忆</p>
+        </footer>
+    </div>
+
+    <script>
+        // 存储所有照片数据
+        let allPhotos = [
+            {
+                url: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                date: "2023年3月10日",
+                desc: "郁金香盛开",
+                season: "spring"
+            },
+            {
+                url: "https://images.unsplash.com/photo-1526397751294-331021109fbd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                date: "2023年4月5日",
+                desc: "春日野花",
+                season: "spring"
+            },
+            {
+                url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                date: "2023年6月20日",
+                desc: "海边度假",
+                season: "summer"
+            },
+            {
+                url: "https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                date: "2023年7月15日",
+                desc: "夏日野餐",
+                season: "summer"
+            },
+            {
+                url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                date: "2023年9月28日",
+                desc: "金秋的麦田",
+                season: "autumn"
+            },
+            {
+                url: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                date: "2023年10月15日",
+                desc: "枫叶红了",
+                season: "autumn"
+            },
+            {
+                url: "https://images.unsplash.com/photo-1517299321609-52687d1bc55a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                date: "2023年12月10日",
+                desc: "第一场雪",
+                season: "winter"
+            },
+            {
+                url: "https://images.unsplash.com/photo-1518604666860-9ed391f76460?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                date: "2023年12月25日",
+                desc: "圣诞节的温暖",
+                season: "winter"
+            }
+        ];
+
+        // 按季节分类的照片数据
+        const photosData = {
+            spring: allPhotos.filter(photo => photo.season === 'spring').slice(0, 2),
+            summer: allPhotos.filter(photo => photo.season === 'summer').slice(0, 2),
+            autumn: allPhotos.filter(photo => photo.season === 'autumn').slice(0, 2),
+            winter: allPhotos.filter(photo => photo.season === 'winter').slice(0, 2)
+        };
+
+        // 幻灯片相关变量
+        let currentSlideIndex = 0;
+        let slideshowInterval;
+        const SLIDE_DURATION = 17000; // 17秒
+
+        // 渲染季节画廊
+        function renderSeasonGallery(season) {
+            const gallery = document.getElementById(`${season}-gallery`);
+            gallery.innerHTML = '';
+            
+            photosData[season].forEach(photo => {
+                const photoCard = document.createElement('div');
+                photoCard.className = 'photo-card';
+                photoCard.innerHTML = `
+                    <img src="${photo.url}" alt="${season}照片" class="photo-img">
+                    <div class="photo-info">
+                        <div class="photo-date">${photo.date}</div>
+                        <div class="photo-desc">${photo.desc}</div>
+                    </div>
+                `;
+                gallery.appendChild(photoCard);
+            });
+        }
+
+        // 渲染照片墙
+        function renderPhotoWall() {
+            const photoWall = document.getElementById('photo-wall');
+            photoWall.innerHTML = '';
+            
+            allPhotos.forEach(photo => {
+                const wallItem = document.createElement('div');
+                wallItem.className = 'photo-wall-item';
+                wallItem.innerHTML = `
+                    <img src="${photo.url}" alt="${photo.season}照片" class="photo-wall-img">
+                    <div class="photo-wall-info">
+                        <div>${photo.date} | ${photo.desc}</div>
+                    </div>
+                `;
+                photoWall.appendChild(wallItem);
+            });
+        }
+
+        // 初始化幻灯片
+        function initSlideshow() {
+            const folderSelect = document.getElementById('folder-select');
+            folderSelect.addEventListener('change', () => {
+                startSlideshow(folderSelect.value);
+            });
+            
+            // 初始化控制按钮
+            document.getElementById('prev-btn').addEventListener('click', showPrevSlide);
+            document.getElementById('next-btn').addEventListener('click', showNextSlide);
+            document.getElementById('play-pause-btn').addEventListener('click', togglePlayPause);
+            
+            // 开始幻灯片
+            startSlideshow('all');
+        }
+
+        // 开始幻灯片播放
+        function startSlideshow(folder) {
+            // 清除现有定时器
+            if (slideshowInterval) {
+                clearInterval(slideshowInterval);
+            }
+            
+            // 根据选择的文件夹筛选照片
+            let slides = [];
+            if (folder === 'all') {
+                slides = [...allPhotos];
+            } else {
+                slides = allPhotos.filter(photo => photo.season === folder);
+            }
+            
+            // 如果没有照片，显示提示
+            if (slides.length === 0) {
+                document.getElementById('slideshow').innerHTML = `
+                    <div style="text-align: center; padding: 50px;">
+                        <p>该文件夹中没有照片</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 渲染幻灯片
+            renderSlides(slides);
+            
+            // 重置当前幻灯片索引
+            currentSlideIndex = 0;
+            showSlide(currentSlideIndex);
+            
+            // 开始自动播放
+            slideshowInterval = setInterval(() => {
+                showNextSlide();
+            }, SLIDE_DURATION);
+        }
+
+        // 渲染幻灯片
+        function renderSlides(photos) {
+            const slideshow = document.getElementById('slideshow');
+            slideshow.innerHTML = '';
+            
+            photos.forEach((photo, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                slide.dataset.index = index;
+                slide.innerHTML = `
+                    <img src="${photo.url}" alt="${photo.desc}">
+                    <div class="slide-info">
+                        <div class="slide-date">${photo.date}</div>
+                        <div class="slide-desc">${photo.desc}</div>
+                    </div>
+                `;
+                slideshow.appendChild(slide);
+            });
+        }
+
+        // 显示指定索引的幻灯片
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+            if (slides.length === 0) return;
+            
+            // 确保索引在有效范围内
+            if (index >= slides.length) {
+                currentSlideIndex = 0;
+            } else if (index < 0) {
+                currentSlideIndex = slides.length - 1;
+            } else {
+                currentSlideIndex = index;
+            }
+            
+            // 隐藏所有幻灯片
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // 显示当前幻灯片
+            slides[currentSlideIndex].classList.add('active');
+        }
+
+        // 显示下一张幻灯片
+        function showNextSlide() {
+            showSlide(currentSlideIndex + 1);
+            
+            // 重置定时器
+            if (slideshowInterval) {
+                clearInterval(slideshowInterval);
+                slideshowInterval = setInterval(showNextSlide, SLIDE_DURATION);
+            }
+        }
+
+        // 显示上一张幻灯片
+        function showPrevSlide() {
+            showSlide(currentSlideIndex - 1);
+            
+            // 重置定时器
+            if (slideshowInterval) {
+                clearInterval(slideshowInterval);
+                slideshowInterval = setInterval(showNextSlide, SLIDE_DURATION);
+            }
+        }
+
+        // 切换播放/暂停状态
+        function togglePlayPause() {
+            const btn = document.getElementById('play-pause-btn');
+            
+            if (slideshowInterval) {
+                clearInterval(slideshowInterval);
+                slideshowInterval = null;
+                btn.textContent = '播放';
+            } else {
+                slideshowInterval = setInterval(showNextSlide, SLIDE_DURATION);
+                btn.textContent = '暂停';
+            }
+        }
+
+        // 上传照片处理
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                // 获取当前月份确定季节
+                const now = new Date();
+                const month = now.getMonth() + 1;
+                let season = '';
+                
+                if (month >= 3 && month <= 5) season = 'spring';
+                else if (month >= 6 && month <= 8) season = 'summer';
+                else if (month >= 9 && month <= 11) season = 'autumn';
+                else season = 'winter';
+                
+                // 添加到照片数据中
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const newPhoto = {
+                            url: e.target.result,
+                            date: now.toLocaleDateString('zh-CN'),
+                            desc: '新上传的照片',
+                            season: season
+                        };
+                        
+                        // 添加到所有照片列表
+                        allPhotos.unshift(newPhoto);
+                        
+                        // 更新季节照片数据（只保留最新的2张）
+                        photosData[season] = allPhotos
+                            .filter(photo => photo.season === season)
+                            .slice(0, 2);
+                        
+                        // 重新渲染
+                        initGalleries();
+                        
+                        // 如果幻灯片正在显示该季节或全部照片，重新加载幻灯片
+                        const currentFolder = document.getElementById('folder-select').value;
+                        if (currentFolder === 'all' || currentFolder === season) {
+                            startSlideshow(currentFolder);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+
+        // 初始化所有画廊和照片墙
+        function initGalleries() {
+            renderSeasonGallery('spring');
+            renderSeasonGallery('summer');
+            renderSeasonGallery('autumn');
+            renderSeasonGallery('winter');
+            renderPhotoWall();
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            initGalleries();
+            initSlideshow();
+        });
+    </script>
+</body>
+</html>
